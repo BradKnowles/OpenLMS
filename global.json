@@ -1,6 +1,9 @@
 {
+  // Pinned to 5.0.303 because:
+  // https://hanskindberg.wordpress.com/2021/08/27/net-analyzers-ide0130/
+  // https://github.com/edumserrano/dot-net-sdk-extensions/issues/73
+  // https://github.com/dotnet/roslyn/issues/55014
   "sdk": {
-    "version": "5.0.0",
-    "rollForward": "latestFeature"
+    "version": "5.0.303"
   }
 }

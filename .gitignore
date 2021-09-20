@@ -5,7 +5,7 @@
 *
 
 # Allow subdirectories so the rest of the rules work
-!/**/  
+!/**/
 
 # Always ignore even if contains allowed files
 bin/
@@ -15,6 +15,7 @@ obj/
 !*.*sln
 !*.*proj
 !global.json
+!.vscode/settings.json
 
 # Include CSharp files
 !*.cs
@@ -34,3 +35,4 @@ obj/
 # Include git configuration files
 !.gitignore
 !.gitattributes
+
