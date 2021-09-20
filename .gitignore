@@ -1,0 +1,36 @@
+## This .gitignore is non-standard, it is an allow list.
+## Files must be explicitly added as exclusions to be committed.
+
+# Ignore all files
+*
+
+# Allow subdirectories so the rest of the rules work
+!/**/  
+
+# Always ignore even if contains allowed files
+bin/
+obj/
+
+# Include Visual Studio files
+!*.*sln
+!*.*proj
+!global.json
+
+# Include CSharp files
+!*.cs
+
+# Include configuration files
+!*.editorconfig
+# !*.yml
+# !*.yaml
+
+# Include MSBUILD files
+!*.props
+!*.targets
+
+# Include documentation files
+!*.md
+
+# Include git configuration files
+!.gitignore
+!.gitattributes
