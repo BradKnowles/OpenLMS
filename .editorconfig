@@ -94,8 +94,8 @@ dotnet_diagnostic.IDE0011.severity                                       = warni
 dotnet_style_namespace_match_folder                                      = true
 dotnet_diagnostic.IDE0130.severity                                       = error
 
-csharp_preserve_single_line_blocks                                       = true : none
-csharp_preserve_single_line_statements                                   = false : none
+csharp_preserve_single_line_blocks                                       = true
+csharp_preserve_single_line_statements                                   = false
 csharp_prefer_static_local_function                                      = true : suggestion
 csharp_prefer_simple_using_statement                                     = false : none
 csharp_style_prefer_switch_expression                                    = true : suggestion
@@ -116,14 +116,22 @@ dotnet_style_prefer_conditional_expression_over_return                   = true 
 csharp_prefer_simple_default_expression                                  = true : suggestion
 
 # Expression-bodied members
-csharp_style_expression_bodied_methods                                   = true : silent
-csharp_style_expression_bodied_constructors                              = true : silent
-csharp_style_expression_bodied_operators                                 = true : silent
-csharp_style_expression_bodied_properties                                = true : silent
-csharp_style_expression_bodied_indexers                                  = true : silent
-csharp_style_expression_bodied_accessors                                 = true : silent
-csharp_style_expression_bodied_lambdas                                   = true : silent
-csharp_style_expression_bodied_local_functions                           = true : silent
+csharp_style_expression_bodied_constructors                              = when_on_single_line
+# IDE0021: Use expression body for constructors
+# https://docs.microsoft.com/en-us/dotnet/fundamentals/code-analysis/style-rules/ide0021
+dotnet_diagnostic.IDE0021.severity                                       = suggestion
+
+csharp_style_expression_bodied_methods                                   = when_on_single_line : suggestion
+# IDE0022: Use expression body for methods
+# https://docs.microsoft.com/en-us/dotnet/fundamentals/code-analysis/style-rules/ide0022
+dotnet_diagnostic.IDE0022.severity                                       = suggestion
+
+csharp_style_expression_bodied_operators                                 = when_on_single_line
+csharp_style_expression_bodied_properties                                = when_on_single_line
+csharp_style_expression_bodied_indexers                                  = when_on_single_line
+csharp_style_expression_bodied_accessors                                 = when_on_single_line
+csharp_style_expression_bodied_lambdas                                   = when_on_single_line
+csharp_style_expression_bodied_local_functions                           = when_on_single_line
 
 # Pattern matching
 csharp_style_pattern_matching_over_is_with_cast_check                    = true : suggestion
@@ -147,7 +155,7 @@ csharp_space_after_dot                                                   = false
 csharp_space_after_keywords_in_control_flow_statements                   = true
 csharp_space_after_semicolon_in_for_statement                            = true
 csharp_space_around_binary_operators                                     = before_and_after
-csharp_space_around_declaration_statements                               = do_not_ignore
+csharp_space_around_declaration_statements                               = false
 csharp_space_before_colon_in_inheritance_clause                          = true
 csharp_space_before_comma                                                = false
 csharp_space_before_dot                                                  = false
