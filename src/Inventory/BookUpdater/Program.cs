@@ -14,12 +14,12 @@ namespace OpenLMS.Inventory.BookUpdater
         {
             using (var actorSystem = ActorSystem.Create("BookUpdaterSystem"))
             {
-                Console.CancelKeyPress += (sender, eventArgs) =>
-                {
-                    // ReSharper disable once AccessToDisposedClosure
-                    actorSystem.Terminate().GetAwaiter().GetResult();
-                    eventArgs.Cancel = true;
-                };
+                // Console.CancelKeyPress += (sender, eventArgs) =>
+                // {
+                //     // ReSharper disable once AccessToDisposedClosure
+                //     actorSystem.Terminate().GetAwaiter().GetResult();
+                //     eventArgs.Cancel = true;
+                // };
 
                 IActorRef feedCoordinator = FeedCoordinator.Create(actorSystem);
                 IActorRef unused = DownloadCoordinator.Create(actorSystem);

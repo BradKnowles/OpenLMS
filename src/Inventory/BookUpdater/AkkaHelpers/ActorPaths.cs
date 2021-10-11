@@ -4,6 +4,9 @@
     {
         public static readonly ActorMetaData FeedCoordinatorActor = new("feedCoordinator");
         public static readonly ActorMetaData DownloadCoordinator = new("downloadCoordinator");
+        public static readonly ActorMetaData FileSystemCoordinator = new("fileSystemCoordinator");
+
         public static readonly ActorMetaData DownloadUrlActor = new("downloadUrl", DownloadCoordinator);
+        public static readonly ActorMetaData SaveFileActor = new("saveFile", FileSystemCoordinator);
     }
 }

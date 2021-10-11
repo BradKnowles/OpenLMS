@@ -1,5 +1,4 @@
 using System;
-using System.Threading.Tasks;
 
 using Akka.Actor;
 
@@ -11,10 +10,12 @@ namespace OpenLMS.Inventory.BookUpdater.Actors
     {
         public FeedCoordinator()
         {
-            ReceiveAsync<Messages.DownloadFeed>(async message =>
+            Receive<Messages.DownloadFeed>(message =>
             {
-                Console.WriteLine(message.FeedUrl);
-                await Task.CompletedTask.ConfigureAwait(false);
+                var downloadMessage = new DownloadCoordinator.Messages.DownloadUrl(message.FeedUrl);
+                ActorSelection downloadCoordinator = Context.ActorSelection(ActorPaths.DownloadCoordinator.Path);
+                downloadCoordinator.Tell(downloadMessage);
+
 
                 // FeedReader.
             });
