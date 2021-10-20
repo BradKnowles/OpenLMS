@@ -3,9 +3,10 @@ using System.Threading.Tasks;
 
 using Akka.Actor;
 
-using OpenLMS.Inventory.BookUpdater.Actors;
+using OpenLMS.Inventory.BookUpdater.Coordinators;
 
 [assembly: CLSCompliant(true)]
+
 namespace OpenLMS.Inventory.BookUpdater
 {
     internal class Program
@@ -21,8 +22,9 @@ namespace OpenLMS.Inventory.BookUpdater
                 //     eventArgs.Cancel = true;
                 // };
 
-                IActorRef feedCoordinator = FeedCoordinator.Create(actorSystem);
-                IActorRef unused = DownloadCoordinator.Create(actorSystem);
+                IActorRef downloadCoordinator = DownloadCoordinator.Create(actorSystem);
+                IActorRef feedCoordinator = FeedCoordinator.Create(actorSystem, downloadCoordinator);
+                // IActorRef feedCoordinator = actorSystem.ActorOf(FeedCoordinator.Props(downloadCoordinator));
 
                 feedCoordinator.Tell(
                     new FeedCoordinator.Messages.DownloadFeed(
