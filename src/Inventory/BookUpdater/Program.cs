@@ -22,12 +22,14 @@ namespace OpenLMS.Inventory.BookUpdater
                 "akka {actor.debug.unhandled = on, loglevel = DEBUG, loggers = [\"Akka.Logger.Serilog.SerilogLogger, Akka.Logger.Serilog\"]}";
             using (var actorSystem = ActorSystem.Create("BookUpdaterSystem", akkaConfigWithLogging))
             {
-                // Console.CancelKeyPress += (sender, eventArgs) =>
-                // {
-                //     // ReSharper disable once AccessToDisposedClosure
-                //     actorSystem.Terminate().GetAwaiter().GetResult();
-                //     eventArgs.Cancel = true;
-                // };
+                Console.CancelKeyPress += (sender, eventArgs) =>
+                {
+                    // ReSharper disable once AccessToDisposedClosure
+                    Task shutdownTask = CoordinatedShutdown.Get(actorSystem)
+                        .Run(CoordinatedShutdown.ClrExitReason.Instance);
+                    shutdownTask.GetAwaiter().GetResult();
+                    eventArgs.Cancel = true;
+                };
 
                 _ = BookUpdaterSupervisor.Create(actorSystem);
 

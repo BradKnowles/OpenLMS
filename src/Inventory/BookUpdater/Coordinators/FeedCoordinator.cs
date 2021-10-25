@@ -15,7 +15,7 @@ namespace OpenLMS.Inventory.BookUpdater.Coordinators
     {
         private readonly ILoggingAdapter _log;
 
-        public FeedCoordinator(IActorRef downloadCoordinator)
+        public FeedCoordinator(IActorRef downloadCoordinator, IActorRef fileSystemSupervisor)
         {
             _log = Context.GetLogger<SerilogLoggingAdapter>()
                 .ForContext("ActorName", $"{Self.Path.Name}#{Self.Path.Uid}");
@@ -32,6 +32,9 @@ namespace OpenLMS.Inventory.BookUpdater.Coordinators
             Receive<DownloadComplete>(message =>
             {
                 _log.Debug("Received {Message}", message);
+                fileSystemSupervisor.Tell(new FileSystemSupervisor.Messages.SaveFile("today.rss", message.Contents,
+                    message.CorrelationId, message.MessageId));
+
                 IActorRef parseFeedActor = ParseFeedActor.Create(Context);
                 parseFeedActor.Tell(new ParseFeedActor.Messages.ParseFeed(message.Contents, message.CorrelationId,
                     message.MessageId));
@@ -40,8 +43,8 @@ namespace OpenLMS.Inventory.BookUpdater.Coordinators
 
 
         public static IActorRef Create(IActorRefFactory actorRefFactory, IActorRef downloadCoordinator,
-            String name = null) =>
-            actorRefFactory.ActorOf(Props.Create<FeedCoordinator>(downloadCoordinator),
+            IActorRef fileSystemSupervisor, String name = null) =>
+            actorRefFactory.ActorOf(Props.Create<FeedCoordinator>(downloadCoordinator, fileSystemSupervisor),
                 String.IsNullOrWhiteSpace(name) ? "feedCoordinator" : name);
 
         protected override void PreStart() => _log.Info("Actor started");

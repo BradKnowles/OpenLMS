@@ -15,8 +15,9 @@ namespace OpenLMS.Inventory.BookUpdater.Coordinators
             _log = Context.GetLogger<SerilogLoggingAdapter>()
                 .ForContext("ActorName", $"{Self.Path.Name}#{Self.Path.Uid}");
 
+            IActorRef fileSystemSupervisor = FileSystemSupervisor.Create(Context);
             IActorRef downloadCoordinator = DownloadCoordinator.Create(Context);
-            IActorRef feedCoordinator = FeedCoordinator.Create(Context, downloadCoordinator);
+            IActorRef feedCoordinator = FeedCoordinator.Create(Context, downloadCoordinator, fileSystemSupervisor);
 
             feedCoordinator.Tell(
                 new FeedCoordinator.Messages.DownloadFeed(
