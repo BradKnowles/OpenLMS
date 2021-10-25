@@ -5,15 +5,22 @@ using Akka.Actor;
 
 using OpenLMS.Inventory.BookUpdater.Coordinators;
 
+using Serilog;
+using Serilog.Core;
+
 [assembly: CLSCompliant(true)]
 
 namespace OpenLMS.Inventory.BookUpdater
 {
     internal class Program
     {
-        private static async Task Main(String[] _)
+        private static async Task Main()
         {
-            using (var actorSystem = ActorSystem.Create("BookUpdaterSystem"))
+            ConfigureLogging();
+
+            const String akkaConfigWithLogging =
+                "akka {actor.debug.unhandled = on, loglevel = DEBUG, loggers = [\"Akka.Logger.Serilog.SerilogLogger, Akka.Logger.Serilog\"]}";
+            using (var actorSystem = ActorSystem.Create("BookUpdaterSystem", akkaConfigWithLogging))
             {
                 // Console.CancelKeyPress += (sender, eventArgs) =>
                 // {
@@ -22,16 +29,22 @@ namespace OpenLMS.Inventory.BookUpdater
                 //     eventArgs.Cancel = true;
                 // };
 
-                IActorRef downloadCoordinator = DownloadCoordinator.Create(actorSystem);
-                IActorRef feedCoordinator = FeedCoordinator.Create(actorSystem, downloadCoordinator);
-                // IActorRef feedCoordinator = actorSystem.ActorOf(FeedCoordinator.Props(downloadCoordinator));
-
-                feedCoordinator.Tell(
-                    new FeedCoordinator.Messages.DownloadFeed(
-                        new Uri("https://www.gutenberg.org/cache/epub/feeds/today.rss")));
+                _ = BookUpdaterSupervisor.Create(actorSystem);
 
                 await actorSystem.WhenTerminated.ConfigureAwait(false);
+                Log.CloseAndFlush();
             }
+        }
+
+        private static void ConfigureLogging()
+        {
+            Logger logger = new LoggerConfiguration()
+                .WriteTo.Console(
+                    outputTemplate: "{Timestamp:HH:mm:ss} {Level:u3}] [{ActorName}] {Message:lj}{NewLine}{Exception}")
+                .MinimumLevel.Debug()
+                .CreateLogger();
+
+            Log.Logger = logger;
         }
     }
 }

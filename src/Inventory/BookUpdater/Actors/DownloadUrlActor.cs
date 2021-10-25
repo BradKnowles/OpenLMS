@@ -1,32 +1,46 @@
 using System;
+using System.Collections.Immutable;
 
 using Akka.Actor;
+using Akka.Event;
+using Akka.Logger.Serilog;
 
 using Flurl.Http;
 
 using OpenLMS.Inventory.BookUpdater.Coordinators;
+using OpenLMS.Inventory.BookUpdater.SharedMessages;
 
 namespace OpenLMS.Inventory.BookUpdater.Actors
 {
     internal class DownloadUrlActor : ReceiveActor
     {
-        // private readonly IActorRef _sender;
+        private readonly ILoggingAdapter _log;
 
-        public DownloadUrlActor() =>
-            // _sender = Sender;
+        public DownloadUrlActor()
+        {
+            _log = Context.GetLogger<SerilogLoggingAdapter>()
+                .ForContext("ActorName", $"{Self.Path.Name}#{Self.Path.Uid}");
+
             ReceiveAsync<DownloadCoordinator.Messages.DownloadUrl>(async message =>
             {
+                _log.Debug("Received message {Message}", message);
+
                 IFlurlResponse response = await message.Url.GetAsync().ConfigureAwait(true);
                 _ = response.ResponseMessage.EnsureSuccessStatusCode();
+
                 Byte[] contents = await response.GetBytesAsync().ConfigureAwait(true);
-                Sender.Tell(new FeedCoordinator.Messages.DownloadedContents(contents));
+                Sender.Tell(new DownloadComplete(contents.ToImmutableArray(), message.CorrelationId,
+                    message.MessageId));
 
-                // IActorRef fileSystemCoordinator = FileSystemCoordinator.Create(Context.System);
-                // fileSystemCoordinator.Tell(new FileSystemCoordinator.Messages.SaveFile("today.rss", contents));
+                Context.Stop(Self);
             });
+        }
 
-        public static IActorRef Create( /*ActorSystem actorSystem, */ String name = null) =>
-            Context.ActorOf(Props.Create<DownloadUrlActor>(),
+        protected override void PreStart() => _log.Info("Actor started");
+        protected override void PostStop() => _log.Info("Actor stopped");
+
+        public static IActorRef Create(IActorRefFactory actorRefFactory, String name = null) =>
+            actorRefFactory.ActorOf(Props.Create<DownloadUrlActor>(),
                 String.IsNullOrWhiteSpace(name) ? "downloadUrl" : name);
 
         internal static class Messages
