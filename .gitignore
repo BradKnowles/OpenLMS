@@ -22,6 +22,7 @@ obj/
 
 # Include configuration files
 !*.editorconfig
+!conventionalcommit.json
 # !*.yml
 # !*.yaml
 

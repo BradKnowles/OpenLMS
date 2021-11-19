@@ -1,4 +1,4 @@
-﻿using System;
+using System;
 
 using Akka.Actor;
 using Akka.Event;
@@ -7,16 +7,18 @@ using Akka.Logger.Serilog;
 using CodeHollow.FeedReader;
 
 using OpenLMS.Inventory.BookUpdater.Actors;
-using OpenLMS.Inventory.BookUpdater.SharedMessages;
 
 namespace OpenLMS.Inventory.BookUpdater.Coordinators
 {
-    internal class FeedCoordinator : ReceiveActor
+    public class FeedCoordinator : ReceiveActor
     {
         private readonly ILoggingAdapter _log;
 
         public FeedCoordinator(IActorRef downloadCoordinator, IActorRef fileSystemSupervisor)
         {
+            if (downloadCoordinator == null) throw new ArgumentNullException(nameof(downloadCoordinator));
+            if (fileSystemSupervisor == null) throw new ArgumentNullException(nameof(fileSystemSupervisor));
+
             _log = Context.GetLogger<SerilogLoggingAdapter>()
                 .ForContext("ActorName", $"{Self.Path.Name}#{Self.Path.Uid}");
 
@@ -26,10 +28,10 @@ namespace OpenLMS.Inventory.BookUpdater.Coordinators
                 var downloadMessage =
                     new DownloadCoordinator.Messages.DownloadUrl(message.FeedUrl, message.CorrelationId,
                         message.MessageId);
-                downloadCoordinator.Tell(downloadMessage);
+                downloadCoordinator.Tell(downloadMessage, Self);
             });
 
-            Receive<DownloadComplete>(message =>
+            Receive<SharedMessages.DownloadComplete>(message =>
             {
                 _log.Debug("Received {Message}", message);
                 fileSystemSupervisor.Tell(new FileSystemSupervisor.Messages.SaveFile("today.rss", message.Contents,
@@ -43,16 +45,22 @@ namespace OpenLMS.Inventory.BookUpdater.Coordinators
 
 
         public static IActorRef Create(IActorRefFactory actorRefFactory, IActorRef downloadCoordinator,
-            IActorRef fileSystemSupervisor, String name = null) =>
-            actorRefFactory.ActorOf(Props.Create<FeedCoordinator>(downloadCoordinator, fileSystemSupervisor),
+            IActorRef fileSystemSupervisor, String name = null)
+        {
+            if (actorRefFactory == null) throw new ArgumentNullException(nameof(actorRefFactory));
+            if (downloadCoordinator == null) throw new ArgumentNullException(nameof(downloadCoordinator));
+            if (fileSystemSupervisor == null) throw new ArgumentNullException(nameof(fileSystemSupervisor));
+
+            return actorRefFactory.ActorOf(Props.Create<FeedCoordinator>(downloadCoordinator, fileSystemSupervisor),
                 String.IsNullOrWhiteSpace(name) ? "feedCoordinator" : name);
+        }
 
         protected override void PreStart() => _log.Info("Actor started");
         protected override void PostStop() => _log.Info("Actor stopped");
 
-        internal static class Messages
+        public static class Messages
         {
-            internal record DownloadFeed
+            public record DownloadFeed
             {
                 public DownloadFeed(Uri feedUrl)
                 {

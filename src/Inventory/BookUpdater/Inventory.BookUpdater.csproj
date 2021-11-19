@@ -1,4 +1,4 @@
-<Project Sdk="Microsoft.NET.Sdk">
+﻿<Project Sdk="Microsoft.NET.Sdk">
 
   <PropertyGroup>
     <OutputType>Exe</OutputType>
@@ -15,6 +15,13 @@
     <PackageReference Include="CodeHollow.FeedReader" Version="1.2.2" />
     <PackageReference Include="Serilog.Sinks.Console" Version="4.0.0"/>
     <PackageReference Include="Zio" Version="0.13.0" />
+  </ItemGroup>
+
+  <ItemGroup>
+    <AssemblyAttribute Include="System.CLSCompliant">
+      <_Parameter1_IsLiteral>true</_Parameter1_IsLiteral>
+      <_Parameter1>false</_Parameter1>
+    </AssemblyAttribute>
   </ItemGroup>
 
 </Project>
