@@ -1,6 +1,6 @@
 Microsoft Visual Studio Solution File, Format Version 12.00
-# Visual Studio Version 16
-VisualStudioVersion = 16.0.31702.278
+# Visual Studio Version 17
+VisualStudioVersion = 17.0.31903.59
 MinimumVisualStudioVersion = 10.0.40219.1
 Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "src", "src", "{C3207296-B9E9-49C8-ACE3-0CD269E841FC}"
 	ProjectSection(SolutionItems) = preProject
@@ -19,6 +19,15 @@ Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "config", "config", "{27615F
 		Directory.Build.props = Directory.Build.props
 		global.json = global.json
 	EndProjectSection
+EndProject
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Inventory.BookUpdater.Tests", "tests\Inventory\BookUpdater\Inventory.BookUpdater.Tests.csproj", "{ECB24950-14FB-41D0-A10C-22EAD38D95AF}"
+EndProject
+Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "tests", "tests", "{1BF0893E-F4D6-44BD-9D3A-F84C247E7FA8}"
+	ProjectSection(SolutionItems) = preProject
+		tests\.editorconfig = tests\.editorconfig
+	EndProjectSection
+EndProject
+Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "Inventory", "Inventory", "{94CBCF0D-A58F-44E6-B8D7-EDB4F6C344E4}"
 EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
@@ -42,6 +51,18 @@ Global
 		{091E5391-6FDA-42B1-B31E-0B4093A51B4B}.Release|x64.Build.0 = Release|Any CPU
 		{091E5391-6FDA-42B1-B31E-0B4093A51B4B}.Release|x86.ActiveCfg = Release|Any CPU
 		{091E5391-6FDA-42B1-B31E-0B4093A51B4B}.Release|x86.Build.0 = Release|Any CPU
+		{ECB24950-14FB-41D0-A10C-22EAD38D95AF}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{ECB24950-14FB-41D0-A10C-22EAD38D95AF}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{ECB24950-14FB-41D0-A10C-22EAD38D95AF}.Debug|x64.ActiveCfg = Debug|Any CPU
+		{ECB24950-14FB-41D0-A10C-22EAD38D95AF}.Debug|x64.Build.0 = Debug|Any CPU
+		{ECB24950-14FB-41D0-A10C-22EAD38D95AF}.Debug|x86.ActiveCfg = Debug|Any CPU
+		{ECB24950-14FB-41D0-A10C-22EAD38D95AF}.Debug|x86.Build.0 = Debug|Any CPU
+		{ECB24950-14FB-41D0-A10C-22EAD38D95AF}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{ECB24950-14FB-41D0-A10C-22EAD38D95AF}.Release|Any CPU.Build.0 = Release|Any CPU
+		{ECB24950-14FB-41D0-A10C-22EAD38D95AF}.Release|x64.ActiveCfg = Release|Any CPU
+		{ECB24950-14FB-41D0-A10C-22EAD38D95AF}.Release|x64.Build.0 = Release|Any CPU
+		{ECB24950-14FB-41D0-A10C-22EAD38D95AF}.Release|x86.ActiveCfg = Release|Any CPU
+		{ECB24950-14FB-41D0-A10C-22EAD38D95AF}.Release|x86.Build.0 = Release|Any CPU
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE
@@ -49,6 +70,8 @@ Global
 	GlobalSection(NestedProjects) = preSolution
 		{51BF169B-214D-4EB9-8E59-4DF57F5549E9} = {C3207296-B9E9-49C8-ACE3-0CD269E841FC}
 		{091E5391-6FDA-42B1-B31E-0B4093A51B4B} = {51BF169B-214D-4EB9-8E59-4DF57F5549E9}
+		{ECB24950-14FB-41D0-A10C-22EAD38D95AF} = {94CBCF0D-A58F-44E6-B8D7-EDB4F6C344E4}
+		{94CBCF0D-A58F-44E6-B8D7-EDB4F6C344E4} = {1BF0893E-F4D6-44BD-9D3A-F84C247E7FA8}
 	EndGlobalSection
 	GlobalSection(ExtensibilityGlobals) = postSolution
 		SolutionGuid = {83F5B64E-1EA9-4E35-9776-DDC663CB42ED}

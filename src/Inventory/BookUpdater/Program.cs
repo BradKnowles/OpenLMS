@@ -8,8 +8,6 @@ using OpenLMS.Inventory.BookUpdater.Coordinators;
 using Serilog;
 using Serilog.Core;
 
-[assembly: CLSCompliant(true)]
-
 namespace OpenLMS.Inventory.BookUpdater
 {
     internal class Program

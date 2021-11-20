@@ -1,6 +1,7 @@
 {
     "conventionalCommits.scopes": [
         "config",
-        "BookUpdater"
+        "BookUpdater",
+        "BookUpdaterTests"
     ]
 }
