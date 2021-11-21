@@ -8,7 +8,6 @@ using Akka.Logger.Serilog;
 using Flurl.Http;
 
 using OpenLMS.Inventory.BookUpdater.Coordinators;
-using OpenLMS.Inventory.BookUpdater.SharedMessages;
 
 namespace OpenLMS.Inventory.BookUpdater.Actors
 {
@@ -29,7 +28,9 @@ namespace OpenLMS.Inventory.BookUpdater.Actors
                 _ = response.ResponseMessage.EnsureSuccessStatusCode();
 
                 Byte[] contents = await response.GetBytesAsync().ConfigureAwait(true);
-                Sender.Tell(new DownloadComplete(contents.ToImmutableArray(), message.CorrelationId,
+                Sender.Tell(new DownloadCoordinator.Messages.DownloadComplete(contents.ToImmutableArray(),
+                    message.DownloadPath,
+                    message.CorrelationId,
                     message.MessageId));
 
                 Context.Stop(Self);
@@ -42,10 +43,5 @@ namespace OpenLMS.Inventory.BookUpdater.Actors
         public static IActorRef Create(IActorRefFactory actorRefFactory, String name = null) =>
             actorRefFactory.ActorOf(Props.Create<DownloadUrlActor>(),
                 String.IsNullOrWhiteSpace(name) ? "downloadUrl" : name);
-
-        internal static class Messages
-        {
-            // internal record DownloadedContents(Byte[] contents);
-        }
     }
 }

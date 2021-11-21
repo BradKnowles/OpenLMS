@@ -7,21 +7,24 @@ using Akka.Logger.Serilog;
 
 using OpenLMS.Inventory.BookUpdater.Actors;
 
+using Zio;
 using Zio.FileSystems;
 
 namespace OpenLMS.Inventory.BookUpdater.Coordinators
 {
-    internal class FileSystemSupervisor : ReceiveActor
+    internal class FileSystemCoordinator : ReceiveActor
     {
         private readonly ILoggingAdapter _log;
 
-        public FileSystemSupervisor()
+        public FileSystemCoordinator()
         {
             _log = Context.GetLogger<SerilogLoggingAdapter>()
                 .ForContext("ActorName", $"{Self.Path.Name}#{Self.Path.Uid}");
 
             Receive<Messages.SaveFile>(message =>
             {
+                _log.Debug("Received message {Message}", message);
+
                 IActorRef saveFileActor = SaveFileActor.Create(Context.System, new PhysicalFileSystem());
                 saveFileActor.Tell(message);
             });
@@ -31,14 +34,14 @@ namespace OpenLMS.Inventory.BookUpdater.Coordinators
         protected override void PostStop() => _log.Info("Actor stopped");
 
         public static IActorRef Create(IActorRefFactory actorRefFactory, String name = null) =>
-            actorRefFactory.ActorOf(Props.Create<FileSystemSupervisor>(),
+            actorRefFactory.ActorOf(Props.Create<FileSystemCoordinator>(),
                 String.IsNullOrWhiteSpace(name) ? "fileSystemSupervisor" : name);
 
         internal class Messages
         {
             internal sealed record SaveFile
             {
-                public SaveFile(String filename, ImmutableArray<Byte> contents, Guid correlationId, Guid causationId)
+                public SaveFile(UPath filename, ImmutableArray<Byte> contents, Guid correlationId, Guid causationId)
                 {
                     Filename = filename;
                     Contents = contents;
@@ -46,7 +49,7 @@ namespace OpenLMS.Inventory.BookUpdater.Coordinators
                     CausationId = causationId;
                 }
 
-                public String Filename { get; init; }
+                public UPath Filename { get; init; }
                 public ImmutableArray<Byte> Contents { get; init; }
                 public Guid MessageId { get; init; } = Guid.NewGuid();
                 public Guid CorrelationId { get; init; }

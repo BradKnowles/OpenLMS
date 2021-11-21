@@ -1,4 +1,5 @@
 using System;
+using System.Collections.Immutable;
 
 using Akka.Actor;
 using Akka.Event;
@@ -6,29 +7,50 @@ using Akka.Logger.Serilog;
 
 using OpenLMS.Inventory.BookUpdater.Actors;
 
+using Zio;
+
 namespace OpenLMS.Inventory.BookUpdater.Coordinators
 {
     public class DownloadCoordinator : ReceiveActor
     {
         private readonly ILoggingAdapter _log;
 
-        public DownloadCoordinator()
+        public DownloadCoordinator(IActorRef fileSystemCoordinator)
         {
+            if (fileSystemCoordinator is null) throw new ArgumentNullException(nameof(fileSystemCoordinator));
+
             _log = Context.GetLogger<SerilogLoggingAdapter>()
                 .ForContext("ActorName", $"{Self.Path.Name}#{Self.Path.Uid}");
 
             Receive<Messages.DownloadUrl>(message =>
             {
+                _log.Debug("Received {Message}", message);
+
                 IActorRef downloadUrlActor = DownloadUrlActor.Create(Context);
-                downloadUrlActor.Forward(message);
+                downloadUrlActor.Tell(message);
+            });
+
+            Receive<Messages.DownloadComplete>(message =>
+            {
+                _log.Debug("Received {Message}", message);
+
+                if (message.SaveToFile)
+                {
+                    fileSystemCoordinator.Tell(new FileSystemCoordinator.Messages.SaveFile(message.DownloadPath,
+                        message.Contents, message.CorrelationId, message.MessageId));
+                }
             });
         }
 
-        public static IActorRef Create(IActorRefFactory actorRefFactory, String name = null) =>
-            actorRefFactory == null
+        public static IActorRef Create(IActorRefFactory actorRefFactory, IActorRef fileSystemSupervisor, String name = null)
+        {
+            if (fileSystemSupervisor == null) throw new ArgumentNullException(nameof(fileSystemSupervisor));
+
+            return actorRefFactory == null
                 ? throw new ArgumentNullException(nameof(actorRefFactory))
-                : actorRefFactory.ActorOf(Props.Create<DownloadCoordinator>(),
+                : actorRefFactory.ActorOf(Props.Create<DownloadCoordinator>(fileSystemSupervisor),
                     String.IsNullOrWhiteSpace(name) ? "downloadCoordinator" : name);
+        }
 
         protected override void PreStart() => _log.Info("Actor started");
         protected override void PostStop() => _log.Info("Actor stopped");
@@ -37,14 +59,36 @@ namespace OpenLMS.Inventory.BookUpdater.Coordinators
         {
             public sealed record DownloadUrl
             {
-                public DownloadUrl(Uri url, Guid correlationId, Guid causationId)
+                public DownloadUrl(Uri url, UPath downloadPath, Guid correlationId, Guid causationId)
                 {
                     Url = url;
+                    DownloadPath = downloadPath;
                     CorrelationId = correlationId;
                     CausationId = causationId;
                 }
 
                 public Uri Url { get; init; }
+                public UPath DownloadPath { get; init; }
+                public Boolean SaveToFile => String.IsNullOrWhiteSpace(DownloadPath.ToString()) == false;
+                public Guid MessageId { get; init; } = Guid.NewGuid();
+                public Guid CorrelationId { get; init; }
+                public Guid CausationId { get; init; }
+            }
+
+            public sealed record DownloadComplete
+            {
+                public DownloadComplete(ImmutableArray<Byte> contents, UPath downloadPath, Guid correlationId,
+                    Guid causationId)
+                {
+                    Contents = contents;
+                    DownloadPath = downloadPath;
+                    CorrelationId = correlationId;
+                    CausationId = causationId;
+                }
+
+                public ImmutableArray<Byte> Contents { get; init; }
+                public UPath DownloadPath { get; init; }
+                public Boolean SaveToFile => String.IsNullOrWhiteSpace(DownloadPath.ToString()) == false;
                 public Guid MessageId { get; init; } = Guid.NewGuid();
                 public Guid CorrelationId { get; init; }
                 public Guid CausationId { get; init; }

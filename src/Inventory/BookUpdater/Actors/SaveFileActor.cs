@@ -20,12 +20,15 @@ namespace OpenLMS.Inventory.BookUpdater.Actors
             _log = Context.GetLogger<SerilogLoggingAdapter>()
                 .ForContext("ActorName", $"{Self.Path.Name}#{Self.Path.Uid}");
 
-            Receive<FileSystemSupervisor.Messages.SaveFile>(message =>
+            Receive<FileSystemCoordinator.Messages.SaveFile>(message =>
             {
+                _log.Debug("Received message {Message}", message);
+
                 UPath currentDirectory = fileSystem.ConvertPathFromInternal(Environment.CurrentDirectory);
-                UPath directory = UPath.Combine(currentDirectory, "savedFiles");
-                fileSystem.CreateDirectory(directory);
-                fileSystem.WriteAllBytes(UPath.Combine(directory, message.Filename), message.Contents.ToArray());
+                var fullPath = UPath.Combine(currentDirectory, message.Filename);
+
+                fileSystem.CreateDirectory(fullPath.GetDirectory());
+                fileSystem.WriteAllBytes(fullPath, message.Contents.ToArray());
 
                 Context.Stop(Self);
             });

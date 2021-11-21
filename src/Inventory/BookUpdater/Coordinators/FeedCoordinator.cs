@@ -6,7 +6,7 @@ using Akka.Logger.Serilog;
 
 using CodeHollow.FeedReader;
 
-using OpenLMS.Inventory.BookUpdater.Actors;
+using Zio;
 
 namespace OpenLMS.Inventory.BookUpdater.Coordinators
 {
@@ -26,23 +26,11 @@ namespace OpenLMS.Inventory.BookUpdater.Coordinators
             {
                 _log.Debug("Received {Message}", message);
                 var downloadMessage =
-                    new DownloadCoordinator.Messages.DownloadUrl(message.FeedUrl, message.CorrelationId,
-                        message.MessageId);
+                    new DownloadCoordinator.Messages.DownloadUrl(message.FeedUrl,
+                        message.FeedDownloadPath, message.CorrelationId, message.MessageId);
                 downloadCoordinator.Tell(downloadMessage, Self);
             });
-
-            Receive<SharedMessages.DownloadComplete>(message =>
-            {
-                _log.Debug("Received {Message}", message);
-                fileSystemSupervisor.Tell(new FileSystemSupervisor.Messages.SaveFile("today.rss", message.Contents,
-                    message.CorrelationId, message.MessageId));
-
-                IActorRef parseFeedActor = ParseFeedActor.Create(Context);
-                parseFeedActor.Tell(new ParseFeedActor.Messages.ParseFeed(message.Contents, message.CorrelationId,
-                    message.MessageId));
-            });
         }
-
 
         public static IActorRef Create(IActorRefFactory actorRefFactory, IActorRef downloadCoordinator,
             IActorRef fileSystemSupervisor, String name = null)
@@ -62,16 +50,21 @@ namespace OpenLMS.Inventory.BookUpdater.Coordinators
         {
             public record DownloadFeed
             {
-                public DownloadFeed(Uri feedUrl)
+                public DownloadFeed(Uri feedUrl) : this(feedUrl, UPath.Empty) { }
+
+                public DownloadFeed(Uri feedUrl, UPath feedDownloadPath)
                 {
                     var id = Guid.NewGuid();
                     FeedUrl = feedUrl;
+                    FeedDownloadPath = feedDownloadPath;
                     MessageId = id;
                     CorrelationId = id;
                     CausationId = id;
                 }
 
                 public Uri FeedUrl { get; init; }
+                public UPath FeedDownloadPath { get; init; }
+                public Boolean SaveToFile => String.IsNullOrWhiteSpace(FeedDownloadPath.FullName) == false;
                 public Guid MessageId { get; init; }
                 public Guid CorrelationId { get; init; }
                 public Guid CausationId { get; init; }
