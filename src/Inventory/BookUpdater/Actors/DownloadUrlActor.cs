@@ -40,8 +40,12 @@ namespace OpenLMS.Inventory.BookUpdater.Actors
         protected override void PreStart() => _log.Info("Actor started");
         protected override void PostStop() => _log.Info("Actor stopped");
 
-        public static IActorRef Create(IActorRefFactory actorRefFactory, String name = null) =>
-            actorRefFactory.ActorOf(Props.Create<DownloadUrlActor>(),
+        public static IActorRef Create(IActorRefFactory actorRefFactory, String name = null)
+        {
+            if (actorRefFactory == null) throw new ArgumentNullException(nameof(actorRefFactory));
+
+            return actorRefFactory.ActorOf(Props.Create<DownloadUrlActor>(),
                 String.IsNullOrWhiteSpace(name) ? "downloadUrl" : name);
+        }
     }
 }

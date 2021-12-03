@@ -19,7 +19,7 @@ namespace OpenLMS.Inventory.BookUpdater.Coordinators
             _log = Context.GetLogger<SerilogLoggingAdapter>()
                 .ForContext("ActorName", $"{Self.Path.Name}#{Self.Path.Uid}");
 
-        public DownloadCoordinator(IActorRef fileSystemCoordinator, IActorRef downloadUrlActor) : this()
+        public DownloadCoordinator(IActorRef fileSystemCoordinator, IDownloadActorProducer downloadUrlActorProducer) : this()
         {
             if (fileSystemCoordinator is null) throw new ArgumentNullException(nameof(fileSystemCoordinator));
 
@@ -27,7 +27,8 @@ namespace OpenLMS.Inventory.BookUpdater.Coordinators
             {
                 _log.Debug("Received {Message}", message);
 
-                downloadUrlActor ??= DownloadUrlActor.Create(Context);
+                //downloadUrlActorProducer = DownloadUrlActor.Create(Context);
+                IActorRef downloadUrlActor = downloadUrlActorProducer.Create(Context);
                 downloadUrlActor.Tell(message);
             });
 
@@ -47,12 +48,13 @@ namespace OpenLMS.Inventory.BookUpdater.Coordinators
             String name = null) => Create(actorRefFactory, fileSystemSupervisor, null, name);
 
         internal static IActorRef Create(IActorRefFactory actorRefFactory, IActorRef fileSystemSupervisor,
-            IActorRef downloadActor, String name = null)
+            IDownloadActorProducer downloadActorProducer, String name = null)
         {
             if (actorRefFactory == null) throw new ArgumentNullException(nameof(actorRefFactory));
             if (fileSystemSupervisor == null) throw new ArgumentNullException(nameof(fileSystemSupervisor));
+            downloadActorProducer ??= new RealDownloadActorProducer();
 
-            return actorRefFactory.ActorOf(Props.Create<DownloadCoordinator>(fileSystemSupervisor, downloadActor),
+            return actorRefFactory.ActorOf(Props.Create<DownloadCoordinator>(fileSystemSupervisor, downloadActorProducer),
                 String.IsNullOrWhiteSpace(name) ? "downloadCoordinator" : name);
         }
 
