@@ -37,6 +37,9 @@ Global
 		Release|Any CPU = Release|Any CPU
 		Release|x64 = Release|x64
 		Release|x86 = Release|x86
+		Test|Any CPU = Test|Any CPU
+		Test|x64 = Test|x64
+		Test|x86 = Test|x86
 	EndGlobalSection
 	GlobalSection(ProjectConfigurationPlatforms) = postSolution
 		{091E5391-6FDA-42B1-B31E-0B4093A51B4B}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
@@ -51,18 +54,28 @@ Global
 		{091E5391-6FDA-42B1-B31E-0B4093A51B4B}.Release|x64.Build.0 = Release|Any CPU
 		{091E5391-6FDA-42B1-B31E-0B4093A51B4B}.Release|x86.ActiveCfg = Release|Any CPU
 		{091E5391-6FDA-42B1-B31E-0B4093A51B4B}.Release|x86.Build.0 = Release|Any CPU
+		{091E5391-6FDA-42B1-B31E-0B4093A51B4B}.Test|Any CPU.ActiveCfg = Test|Any CPU
+		{091E5391-6FDA-42B1-B31E-0B4093A51B4B}.Test|Any CPU.Build.0 = Test|Any CPU
+		{091E5391-6FDA-42B1-B31E-0B4093A51B4B}.Test|x64.ActiveCfg = Test|Any CPU
+		{091E5391-6FDA-42B1-B31E-0B4093A51B4B}.Test|x64.Build.0 = Test|Any CPU
+		{091E5391-6FDA-42B1-B31E-0B4093A51B4B}.Test|x86.ActiveCfg = Test|Any CPU
+		{091E5391-6FDA-42B1-B31E-0B4093A51B4B}.Test|x86.Build.0 = Test|Any CPU
 		{ECB24950-14FB-41D0-A10C-22EAD38D95AF}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
-		{ECB24950-14FB-41D0-A10C-22EAD38D95AF}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{ECB24950-14FB-41D0-A10C-22EAD38D95AF}.Debug|x64.ActiveCfg = Debug|Any CPU
 		{ECB24950-14FB-41D0-A10C-22EAD38D95AF}.Debug|x64.Build.0 = Debug|Any CPU
 		{ECB24950-14FB-41D0-A10C-22EAD38D95AF}.Debug|x86.ActiveCfg = Debug|Any CPU
 		{ECB24950-14FB-41D0-A10C-22EAD38D95AF}.Debug|x86.Build.0 = Debug|Any CPU
 		{ECB24950-14FB-41D0-A10C-22EAD38D95AF}.Release|Any CPU.ActiveCfg = Release|Any CPU
-		{ECB24950-14FB-41D0-A10C-22EAD38D95AF}.Release|Any CPU.Build.0 = Release|Any CPU
 		{ECB24950-14FB-41D0-A10C-22EAD38D95AF}.Release|x64.ActiveCfg = Release|Any CPU
 		{ECB24950-14FB-41D0-A10C-22EAD38D95AF}.Release|x64.Build.0 = Release|Any CPU
 		{ECB24950-14FB-41D0-A10C-22EAD38D95AF}.Release|x86.ActiveCfg = Release|Any CPU
 		{ECB24950-14FB-41D0-A10C-22EAD38D95AF}.Release|x86.Build.0 = Release|Any CPU
+		{ECB24950-14FB-41D0-A10C-22EAD38D95AF}.Test|Any CPU.ActiveCfg = Test|Any CPU
+		{ECB24950-14FB-41D0-A10C-22EAD38D95AF}.Test|Any CPU.Build.0 = Test|Any CPU
+		{ECB24950-14FB-41D0-A10C-22EAD38D95AF}.Test|x64.ActiveCfg = Test|Any CPU
+		{ECB24950-14FB-41D0-A10C-22EAD38D95AF}.Test|x64.Build.0 = Test|Any CPU
+		{ECB24950-14FB-41D0-A10C-22EAD38D95AF}.Test|x86.ActiveCfg = Test|Any CPU
+		{ECB24950-14FB-41D0-A10C-22EAD38D95AF}.Test|x86.Build.0 = Test|Any CPU
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE

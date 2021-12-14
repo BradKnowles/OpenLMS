@@ -19,7 +19,12 @@ namespace OpenLMS.Inventory.BookUpdater.Coordinators
             _log = Context.GetLogger<SerilogLoggingAdapter>()
                 .ForContext("ActorName", $"{Self.Path.Name}#{Self.Path.Uid}");
 
-        public DownloadCoordinator(IActorRef fileSystemCoordinator, IDownloadActorProducer downloadUrlActorProducer) : this()
+        public DownloadCoordinator(IActorRef fileSystemCoordinator) : this(fileSystemCoordinator, null) { }
+#if TEST
+        public DownloadCoordinator(IActorRef fileSystemCoordinator, IActorRef downloadUrlActor) : this()
+#else
+        private DownloadCoordinator(IActorRef fileSystemCoordinator, IActorRef downloadUrlActor) : this()
+#endif
         {
             if (fileSystemCoordinator is null) throw new ArgumentNullException(nameof(fileSystemCoordinator));
 
@@ -27,8 +32,7 @@ namespace OpenLMS.Inventory.BookUpdater.Coordinators
             {
                 _log.Debug("Received {Message}", message);
 
-                //downloadUrlActorProducer = DownloadUrlActor.Create(Context);
-                IActorRef downloadUrlActor = downloadUrlActorProducer.Create(Context);
+                downloadUrlActor ??= DownloadUrlActor.Create(Context);
                 downloadUrlActor.Tell(message);
             });
 
@@ -46,15 +50,17 @@ namespace OpenLMS.Inventory.BookUpdater.Coordinators
 
         public static IActorRef Create(IActorRefFactory actorRefFactory, IActorRef fileSystemSupervisor,
             String name = null) => Create(actorRefFactory, fileSystemSupervisor, null, name);
-
-        internal static IActorRef Create(IActorRefFactory actorRefFactory, IActorRef fileSystemSupervisor,
-            IDownloadActorProducer downloadActorProducer, String name = null)
+#if TEST
+        public static IActorRef Create(IActorRefFactory actorRefFactory, IActorRef fileSystemSupervisor,
+#else
+        private static IActorRef Create(IActorRefFactory actorRefFactory, IActorRef fileSystemSupervisor,
+#endif
+            IActorRef downloadActor, String name = null)
         {
             if (actorRefFactory == null) throw new ArgumentNullException(nameof(actorRefFactory));
             if (fileSystemSupervisor == null) throw new ArgumentNullException(nameof(fileSystemSupervisor));
-            downloadActorProducer ??= new RealDownloadActorProducer();
 
-            return actorRefFactory.ActorOf(Props.Create<DownloadCoordinator>(fileSystemSupervisor, downloadActorProducer),
+            return actorRefFactory.ActorOf(Props.Create<DownloadCoordinator>(fileSystemSupervisor, downloadActor),
                 String.IsNullOrWhiteSpace(name) ? "downloadCoordinator" : name);
         }
 

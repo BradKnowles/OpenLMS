@@ -22,41 +22,35 @@ namespace OpenLMS.Inventory.BookUpdater.Tests
         public void DownloadCoordinator_DownloadUrlMsg_SendToDownloadActor()
         {
             TestProbe fileSystemCoordinator = CreateTestProbe();
-            var downloadUrlActorProducer = new TestDownloadActorProducer();
-            // TestProbe downloadUrlActor = downloadUrlActorProducer.Create(Sys);
+            TestProbe downloadUrlActor = CreateTestProbe();
 
             var message = new DownloadCoordinator.Messages.DownloadUrl(new Uri("https://www.example.com"),
                 new UPath("path/to/save/file.ext"),
                 Guid.NewGuid(), Guid.NewGuid());
 
-            IActorRef sut = DownloadCoordinator.Create(Sys, fileSystemCoordinator, downloadUrlActorProducer);
+            IActorRef sut = DownloadCoordinator.Create(Sys, fileSystemCoordinator, downloadUrlActor);
             sut.Tell(message);
 
-            DownloadCoordinator.Messages.DownloadUrl result = downloadUrlActorProducer.Probe.ExpectMsg<DownloadCoordinator.Messages.DownloadUrl>();
+            DownloadCoordinator.Messages.DownloadUrl result = downloadUrlActor.ExpectMsg<DownloadCoordinator.Messages.DownloadUrl>();
             result.Url.ShouldBe(message.Url);
             result.SaveToFile.ShouldBe(true);
             result.DownloadPath.ShouldBe(message.DownloadPath);
             result.CorrelationId.ShouldBe(message.CorrelationId);
             result.CausationId.ShouldBe(message.CausationId);
-
-            downloadUrlActorProducer.Dispose();
         }
 
         [Fact]
         public void DownloadCoordinator_DownloadCompleteMsg_SendSaveFileMsg()
         {
             TestProbe fileSystemCoordinator = CreateTestProbe();
-            var downloadUrlActorProducer = new TestDownloadActorProducer();
-            // IActorRef downloadUrlActor = downloadUrlActorProducer.Create(Sys);
-            //TestProbe downloadUrlActor = CreateTestProbe();
+            TestProbe downloadUrlActor = CreateTestProbe();
             var downloadContents = Encoding.UTF8.GetBytes("Downloaded data.").ToImmutableArray();
 
             var message = new DownloadCoordinator.Messages.DownloadComplete(downloadContents, new UPath("path/to/save/file.ext"),
                 Guid.NewGuid(), Guid.NewGuid());
 
-            IActorRef sut = DownloadCoordinator.Create(Sys, fileSystemCoordinator, downloadUrlActorProducer);
+            IActorRef sut = DownloadCoordinator.Create(Sys, fileSystemCoordinator, downloadUrlActor);
             sut.Tell(message);
-            downloadUrlActorProducer.Dispose();
 
             FileSystemCoordinator.Messages.SaveFile result = fileSystemCoordinator.ExpectMsg<FileSystemCoordinator.Messages.SaveFile>();
             result.Contents.ShouldBe(downloadContents);
@@ -67,6 +61,6 @@ namespace OpenLMS.Inventory.BookUpdater.Tests
 
         [Fact]
         public void DownloadCoordinator_CreateWithNull_ThrowsException()
-            => Should.Throw<ArgumentNullException>(() => DownloadCoordinator.Create(Sys, null));
+            => Should.Throw<ArgumentNullException>(() => DownloadCoordinator.Create(Sys, null, null));
     }
 }
