@@ -61,6 +61,10 @@ namespace OpenLMS.Inventory.BookUpdater.Tests
 
         [Fact]
         public void DownloadCoordinator_CreateWithNull_ThrowsException()
-            => Should.Throw<ArgumentNullException>(() => DownloadCoordinator.Create(Sys, null, null));
+        {
+            const String VALID_NAME = "";
+            _ = Should.Throw<ArgumentNullException>(() => DownloadCoordinator.Create(null, CreateTestProbe(), VALID_NAME));
+            _ = Should.Throw<ArgumentNullException>(() => DownloadCoordinator.Create(Sys, null, VALID_NAME));
+        }
     }
 }
