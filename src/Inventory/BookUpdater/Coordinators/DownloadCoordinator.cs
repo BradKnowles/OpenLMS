@@ -6,8 +6,11 @@ using Akka.Event;
 using Akka.Logger.Serilog;
 
 using OpenLMS.Inventory.BookUpdater.Actors;
+//using OpenLMS.Inventory.BookUpdater.AkkaHelpers;
 
 using Zio;
+
+using Props = OpenLMS.Inventory.BookUpdater.AkkaHelpers.Props;
 
 namespace OpenLMS.Inventory.BookUpdater.Coordinators
 {
@@ -19,12 +22,7 @@ namespace OpenLMS.Inventory.BookUpdater.Coordinators
             _log = Context.GetLogger<SerilogLoggingAdapter>()
                 .ForContext("ActorName", $"{Self.Path.Name}#{Self.Path.Uid}");
 
-        public DownloadCoordinator(IActorRef fileSystemCoordinator) : this(fileSystemCoordinator, null) { }
-#if TEST
-        public DownloadCoordinator(IActorRef fileSystemCoordinator, IActorRef downloadUrlActor) : this()
-#else
-        private DownloadCoordinator(IActorRef fileSystemCoordinator, IActorRef downloadUrlActor) : this()
-#endif
+        internal DownloadCoordinator(IActorRef fileSystemCoordinator, IActorRef downloadUrlActor) : this()
         {
             if (fileSystemCoordinator is null) throw new ArgumentNullException(nameof(fileSystemCoordinator));
 
@@ -50,6 +48,7 @@ namespace OpenLMS.Inventory.BookUpdater.Coordinators
 
         public static IActorRef Create(IActorRefFactory actorRefFactory, IActorRef fileSystemSupervisor,
             String name = null) => Create(actorRefFactory, fileSystemSupervisor, null, name);
+
 #if TEST
         public static IActorRef Create(IActorRefFactory actorRefFactory, IActorRef fileSystemSupervisor,
 #else
@@ -60,7 +59,7 @@ namespace OpenLMS.Inventory.BookUpdater.Coordinators
             if (actorRefFactory == null) throw new ArgumentNullException(nameof(actorRefFactory));
             if (fileSystemSupervisor == null) throw new ArgumentNullException(nameof(fileSystemSupervisor));
 
-            return actorRefFactory.ActorOf(Props.Create<DownloadCoordinator>(fileSystemSupervisor, downloadActor),
+            return actorRefFactory.ActorOf(Props.CreateUsingPrivateConstructor<DownloadCoordinator>(fileSystemSupervisor, downloadActor),
                 String.IsNullOrWhiteSpace(name) ? "downloadCoordinator" : name);
         }
 
