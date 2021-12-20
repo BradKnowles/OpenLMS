@@ -6,15 +6,12 @@ using Akka.Event;
 using Akka.Logger.Serilog;
 
 using OpenLMS.Inventory.BookUpdater.Actors;
-//using OpenLMS.Inventory.BookUpdater.AkkaHelpers;
 
 using Zio;
 
-using Props = OpenLMS.Inventory.BookUpdater.AkkaHelpers.Props;
-
 namespace OpenLMS.Inventory.BookUpdater.Coordinators
 {
-    public class DownloadCoordinator : ReceiveActor
+    internal class DownloadCoordinator : ReceiveActor
     {
         private readonly ILoggingAdapter _log;
 
@@ -59,7 +56,7 @@ namespace OpenLMS.Inventory.BookUpdater.Coordinators
             if (actorRefFactory == null) throw new ArgumentNullException(nameof(actorRefFactory));
             if (fileSystemSupervisor == null) throw new ArgumentNullException(nameof(fileSystemSupervisor));
 
-            return actorRefFactory.ActorOf(Props.CreateUsingPrivateConstructor<DownloadCoordinator>(fileSystemSupervisor, downloadActor),
+            return actorRefFactory.ActorOf(AkkaOverrides.Props.CreatePrivate<DownloadCoordinator>(fileSystemSupervisor, downloadActor),
                 String.IsNullOrWhiteSpace(name) ? "downloadCoordinator" : name);
         }
 
