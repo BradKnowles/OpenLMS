@@ -1,4 +1,7 @@
 using System;
+using System.Collections.Generic;
+using System.Collections.Immutable;
+using System.Linq;
 
 using Akka.Actor;
 using Akka.Event;
@@ -25,10 +28,51 @@ namespace OpenLMS.Inventory.BookUpdater.Coordinators
             Receive<Messages.DownloadFeed>(message =>
             {
                 _log.Debug("Received {Message}", message);
+                var x = new List<IActorRef>
+                {
+                    Self
+                };
                 var downloadMessage =
                     new DownloadCoordinator.Messages.DownloadUrl(message.FeedUrl,
-                        message.FeedDownloadPath, message.CorrelationId, message.MessageId);
-                downloadCoordinator.Tell(downloadMessage, Self);
+                        message.FeedDownloadPath, x.ToImmutableArray(), message.CorrelationId, message.MessageId);
+
+                downloadCoordinator.Tell(downloadMessage);
+            });
+
+            Receive<Messages.FeedDownloaded>(message =>
+            {
+                _log.Debug("Received {Message}", message);
+
+                Byte[] feedArray = new Byte[message.Contents.Length];
+                message.Contents.CopyTo(feedArray);
+                Feed feed = FeedReader.ReadFromByteArray(feedArray);
+
+                foreach (FeedItem item in feed.Items)
+                {
+                    String bookId = $"{item.Link.Split('/').Last()}";
+                    String fileName = $"./feeds/{bookId}.rdf";
+                    var url = new Uri($"{item.Link}.rdf");
+                    var downloadMessage = new DownloadCoordinator.Messages.DownloadUrl(url, fileName, message.CorrelationId, message.MessageId);
+                    downloadCoordinator.Tell(downloadMessage, Self);
+                }
+            });
+
+            Receive<DownloadCoordinator.Messages.DownloadComplete>(message =>
+            {
+                _log.Debug("Received {Message}", message);
+
+                Byte[] feedArray = new Byte[message.Contents.Length];
+                message.Contents.CopyTo(feedArray);
+                Feed feed = FeedReader.ReadFromByteArray(feedArray);
+
+                foreach (FeedItem item in feed.Items)
+                {
+                    String bookId = $"{item.Link.Split('/').Last()}";
+                    String fileName = $"./feeds/{bookId}.rdf";
+                    var url = new Uri($"{item.Link}.rdf");
+                    var downloadMessage = new DownloadCoordinator.Messages.DownloadUrl(url, fileName, message.CorrelationId, message.MessageId);
+                    downloadCoordinator.Tell(downloadMessage, Self);
+                }
             });
         }
 
@@ -66,6 +110,21 @@ namespace OpenLMS.Inventory.BookUpdater.Coordinators
                 public UPath FeedDownloadPath { get; init; }
                 public Boolean SaveToFile => String.IsNullOrWhiteSpace(FeedDownloadPath.FullName) == false;
                 public Guid MessageId { get; init; }
+                public Guid CorrelationId { get; init; }
+                public Guid CausationId { get; init; }
+            }
+
+            public record FeedDownloaded
+            {
+                public FeedDownloaded(ImmutableArray<Byte> contents, Guid correlationId, Guid causationId)
+                {
+                    Contents = contents;
+                    CorrelationId = correlationId;
+                    CausationId = causationId;
+                }
+
+                public ImmutableArray<Byte> Contents { get; init; }
+                public Guid MessageId { get; init; } = Guid.NewGuid();
                 public Guid CorrelationId { get; init; }
                 public Guid CausationId { get; init; }
             }

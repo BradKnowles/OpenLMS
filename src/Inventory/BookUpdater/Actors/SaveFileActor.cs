@@ -1,4 +1,5 @@
 using System;
+using System.IO;
 using System.Linq;
 
 using Akka.Actor;
@@ -37,8 +38,10 @@ namespace OpenLMS.Inventory.BookUpdater.Actors
         protected override void PreStart() => _log.Info("Actor started");
         protected override void PostStop() => _log.Info("Actor stopped");
 
-        public static IActorRef Create(IActorRefFactory actorRefFactor, IFileSystem fileSystem, String name = null) =>
-            actorRefFactor.ActorOf(Props.Create<SaveFileActor>(fileSystem),
-                String.IsNullOrWhiteSpace(name) ? "saveFile" : name);
+        public static IActorRef Create(IActorRefFactory actorRefFactor, IFileSystem fileSystem, String name = null)
+        {
+            String actorName = $"{(String.IsNullOrWhiteSpace(name) ? "downloadUrl" : name)}-{Path.GetRandomFileName().Substring(0, 5)}";
+            return actorRefFactor.ActorOf(Props.Create<SaveFileActor>(fileSystem), actorName);
+        }
     }
 }

@@ -1,5 +1,6 @@
 using System;
 using System.Collections.Immutable;
+using System.IO;
 
 using Akka.Actor;
 using Akka.Event;
@@ -30,6 +31,7 @@ namespace OpenLMS.Inventory.BookUpdater.Actors
                 Byte[] contents = await response.GetBytesAsync().ConfigureAwait(true);
                 Sender.Tell(new DownloadCoordinator.Messages.DownloadComplete(contents.ToImmutableArray(),
                     message.DownloadPath,
+                    message.ReplyTo,
                     message.CorrelationId,
                     message.MessageId));
 
@@ -44,8 +46,8 @@ namespace OpenLMS.Inventory.BookUpdater.Actors
         {
             if (actorRefFactory == null) throw new ArgumentNullException(nameof(actorRefFactory));
 
-            return actorRefFactory.ActorOf(Props.Create<DownloadUrlActor>(),
-                String.IsNullOrWhiteSpace(name) ? "downloadUrl" : name);
+            String actorName = $"{(String.IsNullOrWhiteSpace(name) ? "downloadUrl" : name)}-{Path.GetRandomFileName().Substring(0, 5)}";
+            return actorRefFactory.ActorOf(Props.Create<DownloadUrlActor>(), actorName);
         }
     }
 }

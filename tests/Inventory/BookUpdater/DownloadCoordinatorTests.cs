@@ -39,6 +39,41 @@ namespace OpenLMS.Inventory.BookUpdater.Tests
             result.CausationId.ShouldBe(message.CausationId);
         }
 
+        [Fact(Skip = "This scenario isn't woking yet")]
+        public void DownloadCoordinator_DownloadUrlMsg_SendMultipleToDownloadActor()
+        {
+            TestProbe fileSystemCoordinator = CreateTestProbe();
+            TestProbe downloadUrlActor = CreateTestProbe();
+
+            var message = new DownloadCoordinator.Messages.DownloadUrl(new Uri("https://www.example.com"),
+                new UPath("path/to/save/file.ext"),
+                Guid.NewGuid(), Guid.NewGuid());
+
+            var message2 = new DownloadCoordinator.Messages.DownloadUrl(new Uri("https://www.example.com"),
+                new UPath("path/to/save/file2.ext"),
+                Guid.NewGuid(), Guid.NewGuid());
+
+            IActorRef sut = DownloadCoordinator.Create(Sys, fileSystemCoordinator, downloadUrlActor);
+            sut.Tell(message);
+
+            DownloadCoordinator.Messages.DownloadUrl result = downloadUrlActor.ExpectMsg<DownloadCoordinator.Messages.DownloadUrl>();
+            result.Url.ShouldBe(message.Url);
+            result.SaveToFile.ShouldBe(true);
+            result.DownloadPath.ShouldBe(message.DownloadPath);
+            result.CorrelationId.ShouldBe(message.CorrelationId);
+            result.CausationId.ShouldBe(message.CausationId);
+
+            Sys.Stop(downloadUrlActor);
+            sut.Tell(message2);
+
+            DownloadCoordinator.Messages.DownloadUrl result2 = downloadUrlActor.ExpectMsg<DownloadCoordinator.Messages.DownloadUrl>();
+            result2.Url.ShouldBe(message2.Url);
+            result2.SaveToFile.ShouldBe(true);
+            result2.DownloadPath.ShouldBe(message2.DownloadPath);
+            result2.CorrelationId.ShouldBe(message2.CorrelationId);
+            result2.CausationId.ShouldBe(message2.CausationId);
+        }
+
         [Fact]
         public void DownloadCoordinator_DownloadCompleteMsg_SendSaveFileMsg()
         {

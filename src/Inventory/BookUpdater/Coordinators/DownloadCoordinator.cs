@@ -27,13 +27,19 @@ namespace OpenLMS.Inventory.BookUpdater.Coordinators
             {
                 _log.Debug("Received {Message}", message);
 
-                downloadUrlActor ??= DownloadUrlActor.Create(Context);
+                downloadUrlActor = DownloadUrlActor.Create(Context);
                 downloadUrlActor.Tell(message);
             });
 
             Receive<Messages.DownloadComplete>(message =>
             {
                 _log.Debug("Received {Message}", message);
+
+                foreach (IActorRef sender in message.ReplyTos)
+                {
+                    sender.Tell(message);
+                }
+
 
                 if (message.SaveToFile)
                 {
@@ -67,16 +73,20 @@ namespace OpenLMS.Inventory.BookUpdater.Coordinators
         {
             public sealed record DownloadUrl
             {
-                public DownloadUrl(Uri url, UPath downloadPath, Guid correlationId, Guid causationId)
+                public DownloadUrl(Uri url, UPath downloadPath, Guid correlationId, Guid causationId) : this(url, downloadPath, ImmutableArray<IActorRef>.Empty, correlationId, causationId) { }
+
+                public DownloadUrl(Uri url, UPath downloadPath, ImmutableArray<IActorRef> replyTo, Guid correlationId, Guid causationId)
                 {
                     Url = url;
                     DownloadPath = downloadPath;
+                    ReplyTo = replyTo;
                     CorrelationId = correlationId;
                     CausationId = causationId;
                 }
 
                 public Uri Url { get; init; }
                 public UPath DownloadPath { get; init; }
+                public ImmutableArray<IActorRef> ReplyTo { get; }
                 public Boolean SaveToFile => String.IsNullOrWhiteSpace(DownloadPath.ToString()) == false;
                 public Guid MessageId { get; init; } = Guid.NewGuid();
                 public Guid CorrelationId { get; init; }
@@ -85,17 +95,20 @@ namespace OpenLMS.Inventory.BookUpdater.Coordinators
 
             public sealed record DownloadComplete
             {
-                public DownloadComplete(ImmutableArray<Byte> contents, UPath downloadPath, Guid correlationId,
-                    Guid causationId)
+                public DownloadComplete(ImmutableArray<Byte> contents, UPath downloadPath, Guid correlationId, Guid causationId) : this(contents, downloadPath, ImmutableArray<IActorRef>.Empty, correlationId, causationId) { }
+                public DownloadComplete(ImmutableArray<Byte> contents, UPath downloadPath, ImmutableArray<IActorRef> replyTos, Guid correlationId, Guid causationId)
                 {
                     Contents = contents;
                     DownloadPath = downloadPath;
+                    ReplyTos = replyTos;
                     CorrelationId = correlationId;
                     CausationId = causationId;
                 }
 
                 public ImmutableArray<Byte> Contents { get; init; }
                 public UPath DownloadPath { get; init; }
+                public ImmutableArray<IActorRef> ReplyTos { get; }
+
                 public Boolean SaveToFile => String.IsNullOrWhiteSpace(DownloadPath.ToString()) == false;
                 public Guid MessageId { get; init; } = Guid.NewGuid();
                 public Guid CorrelationId { get; init; }
